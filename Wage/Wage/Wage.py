@@ -1,5 +1,7 @@
 from defines import *
 
+#Learn from my mistake as I did, make the function in the file for ease of use!
+
 base_wage = checkfloat(input("Enter your wage: "), 1)
 shift_bonus = checkfloat(input("Enter shift bonus %"), base_wage)
 shift_bonus = round2M(shift_bonus, .01)
