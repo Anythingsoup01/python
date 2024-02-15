@@ -18,7 +18,7 @@ def modulos(num1, num2):
     return float(num1) % float(num2)
     
 def power(num1, num2):
-    return float(num1) ^ float(num2)
+    return float(num1) ** float(num2)
     
 def square_root(num1):
     return sqrt(float(num1))
