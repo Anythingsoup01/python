@@ -1,107 +1,68 @@
-def roundvars(times = 1, num1 = 0, num2 = 0, num3 = 0, num4 = 0):
-    match times:
-        case 1: return(round(num1 * num2,2))
-        case 2: return(round(num1 + num2,2))
-        case 3: return(round(num1 + num2 + num3,2))
-        case 4: return(round(num1 + num2 + num3 + num4,2))
+def checkvar(var, against = 1, by = 1):
+    if "exit" in var: quit()
+    else: 
+        var = var or 0
+        return round(float(var) / against * by, 2)
+    
         
-def checkfloat(floatvar, by):
-    
-    if floatvar.lower() == "exit":
-        quit()
-        
-    else:
-        floatvar = floatvar or 0
-        floatvar = float(floatvar)
-        return roundvars(1, floatvar, by)
+base_wage = checkvar(input("Enter your hourly rate: $"))
+overtime_wage = round(float(base_wage) * 1.5, 2)
+shift_bonus = checkvar(input("Enter shift bonus \"if applicable\": %"), 100, base_wage)
+total_tax_deduction = checkvar(input("What percentage of your income is taxed? %"), 100)
 
-def checkint(integer):
+while True:
+    weeksofwork = checkvar(input("\nPay Period Schedule: "))
     
-    if integer.lower() == "exit":
-        quit()
-        
-    else:
-        integer = integer or 0
-
-        return int(integer)
+    total_wage = 0
+    total_shift_bonus = 0
+    total_overtime = 0
+    total_nonstandard = 0
+    total_gross = 0
+    total_net = 0
+    total_taxes = 0
     
-base_wage = checkfloat(input("Enter your wage: "), 1)
-
-shift_bonus = checkfloat(input("Enter shift bonus %"), base_wage)
-shift_bonus = roundvars(1, shift_bonus, .01)
-
-overtime_wage = base_wage * 1.5
-
-taxes = checkfloat(input("How much is your total tax deductible? %"), .01)
-
-while True: 
-    
-    weeksofwork = checkint(input("\nHow many weeks of work have you got? "))
-    
-    week_hours           = []
-    week_shift_bonus     = []
-    week_base_wage       = []
-    week_overtime        = []
-    week_overtime_hours  = [] 
-    week_sick_pay        = []
-    week_gross_pay       = []
-    week_net_pay         = []
-    week_taxes_deducted  = []
-    
-    final_shift_bonus    = 0
-    final_base_wage      = 0
-    final_overtime       = 0
-    final_sick_pay       = 0
-    final_gross_pay      = 0
-    final_net_pay        = 0
-    final_taxes_deducted = 0
-    
-    for week in range(0, weeksofwork):
-        if weeksofwork >= 5 or weeksofwork <= 0:
-            print(f"Sorry {weeksofwork} is out of range, please use 4 or lower!")
-            break 
-        
-        week_hours.append(checkfloat(input(f"\n\nEnter total hours for week {week + 1} : "), 1))  
-        
-        if week_hours[week] > 40:
-            week_shift_bonus.append(roundvars(1, shift_bonus,week_hours[week]))
-            week_base_wage.append(roundvars(1, base_wage, 40))
-            week_overtime_hours.append(week_hours[week] - 40)
-            week_overtime.append(roundvars(1, week_overtime_hours[week], overtime_wage))
-
+    for week in range(1, int(weeksofwork) + 1):
+        if weeksofwork > 4: print("I'm sorry, to get a more reliable number, please stay within the limit of 1-4")
         else:
-            week_shift_bonus.append(roundvars(1, shift_bonus,week_hours[week]))
-            week_base_wage.append(roundvars(1, base_wage, week_hours[week]))
-            week_overtime.append(0)  
+            week_hours = checkvar(input(f"\n\nHow many hours did you work for Week {week}? "))
+        
+            if week_hours >= 40:
+                week_wage = round(base_wage * 40, 2)
+                week_shift_bonus = round(shift_bonus * week_hours, 2)
+                week_overtime = round(week_hours - 40, 2)
+                week_overtime = round(week_overtime * overtime_wage, 2)
+            else :
+                week_wage = round(base_wage * week_hours, 2)
+                week_shift_bonus = round(shift_bonus * week_hours, 2)
+                week_overtime = 0
+            week_nonstandard = round(checkvar(input("Any sick, holiday or vacation time?: ")) * base_wage, 2)
+            week_gross = round(week_wage + week_shift_bonus + week_overtime + week_nonstandard, 2)
+            week_net = round(week_gross * (1.0 - total_tax_deduction), 2)
+            week_taxes = round(week_gross - week_net, 2)
+        
+        total_wage += week_wage
+        total_shift_bonus += week_shift_bonus
+        total_overtime += week_overtime
+        total_nonstandard += week_nonstandard
+        total_gross += week_gross
+        total_net += week_net
+        total_taxes += week_taxes
+        
+        print(f"\nBase Pay: ${week_wage:,}\nShift Pay: ${week_shift_bonus:,}\nOvertime: ${week_overtime:,}\nNonstandard Pay: ${week_nonstandard:,}\nGross Pay: ${week_gross:,}\nNet Pay: ${week_net:,}\nTaxes and deductibles: ${week_taxes:,}")
+    print(f"\nBase Pay: ${total_wage:,}\nShift Pay: ${total_shift_bonus:,}\nOvertime: ${total_overtime:,}\nNonstandard Pay: ${total_nonstandard:,}\nGross Pay: ${total_gross:,}\nNet Pay: ${total_net:,}\nTaxes and deductibles: ${total_taxes:,}")
+    pay_period_to_salary = round(52 / weeksofwork)
+    ask_to_check_salary = True
+    while ask_to_check_salary:
+        check_salary = input("Would you like to check your salary? Y/n")
+        if "y" in check_salary.lower():
+            total_wage = total_wage * pay_period_to_salary
+            total_shift_bonus = total_shift_bonus * pay_period_to_salary
+            total_overtime = total_overtime * pay_period_to_salary
+            total_nonstandard = total_nonstandard * pay_period_to_salary
+            total_gross = total_gross * pay_period_to_salary
+            total_net = total_net * pay_period_to_salary
+            total_taxes = total_taxes * pay_period_to_salary
+            print(f"\nBase Pay: ${total_wage:,}\nShift Pay: ${total_shift_bonus:,}\nOvertime: ${total_overtime:,}\nNonstandard Pay: ${total_nonstandard:,}\nGross Pay: ${total_gross:,}\nNet Pay: ${total_net:,}\nTaxes and deductibles: ${total_taxes:,}")
+        else:
+            ask_to_check_salary = False    
             
-        week_sick_pay.append(checkfloat(input("Any sick pay? "), base_wage))
-        week_gross_pay.append(roundvars(4, week_shift_bonus[week],week_base_wage[week],week_overtime[week],week_sick_pay[week]))
-        week_net_pay.append(roundvars(1, week_gross_pay[week], taxes)) 
-        week_taxes_deducted.append(round(week_gross_pay[week] - week_net_pay[week], 2))
-        
-        final_shift_bonus     = roundvars(2, final_shift_bonus    , week_shift_bonus[week])
-        final_base_wage       = roundvars(2, final_base_wage      , week_base_wage[week])
-        final_overtime        = roundvars(2, final_overtime       , week_overtime[week])
-        final_sick_pay        = roundvars(2, final_sick_pay       , week_sick_pay[week])
-        final_gross_pay       = roundvars(2, final_gross_pay      , week_gross_pay[week])
-        final_net_pay         = roundvars(2, final_net_pay        , week_net_pay[week])
-        final_taxes_deducted  = roundvars(2, final_taxes_deducted , week_taxes_deducted[week])
-        
-        print(f"Shift Bonus: ${week_shift_bonus[week]:,}\
-              \nBase Wage: ${week_base_wage[week]:,}\
-              \nOvertime Total: ${week_overtime[week]:,}\
-              \nSick Pay Total: ${week_sick_pay[week]:,}\
-              \nGross Pay: ${week_gross_pay[week]:,}\
-              \nNet Pay: ${week_net_pay[week]:,}\
-              \nTaxes Deducted: ${week_taxes_deducted[week]:,}\
-              \n")
-
-    if final_gross_pay != 0:
-        if weeksofwork > 1:
-            print(f"Pay Period Shift Bonus: ${final_shift_bonus:,}\
-                  \nPay Period Base Total: ${final_base_wage:,}\
-                  \nPay Period Overtime: ${final_overtime:,}\
-                  \nPay Period Sick Pay Total: ${final_sick_pay:,}\
-                  \nGross Pay: ${final_gross_pay:,}\
-                  \nNet Pay: ${final_net_pay:,}\
-                  \nTaxes Deducted: ${final_taxes_deducted:,}")
