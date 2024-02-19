@@ -3,7 +3,6 @@ def checkvar(var, against = 1, by = 1):
     else: 
         var = var or 0
         return round(float(var) / against * by, 2)
-    
         
 base_wage = checkvar(input("Enter your hourly rate: $"))
 overtime_wage = round(float(base_wage) * 1.5, 2)
@@ -12,20 +11,12 @@ total_tax_deduction = checkvar(input("What percentage of your income is taxed? %
 
 while True:
     weeksofwork = checkvar(input("\nPay Period Schedule: "))
-    
-    total_wage = 0
-    total_shift_bonus = 0
-    total_overtime = 0
-    total_nonstandard = 0
-    total_gross = 0
-    total_net = 0
-    total_taxes = 0
+    total = {'wage' : 0, 'shift_bonus' : 0, 'overtime' : 0, 'nonstandard' : 0, 'gross' : 0, 'net' : 0, 'taxes' : 0}
     
     for week in range(1, int(weeksofwork) + 1):
         if weeksofwork > 4: print("I'm sorry, to get a more reliable number, please stay within the limit of 1-4")
         else:
             week_hours = checkvar(input(f"\n\nHow many hours did you work for Week {week}? "))
-        
             if week_hours >= 40:
                 week_wage = round(base_wage * 40, 2)
                 week_shift_bonus = round(shift_bonus * week_hours, 2)
@@ -40,29 +31,29 @@ while True:
             week_net = round(week_gross * (1.0 - total_tax_deduction), 2)
             week_taxes = round(week_gross - week_net, 2)
         
-        total_wage += week_wage
-        total_shift_bonus += week_shift_bonus
-        total_overtime += week_overtime
-        total_nonstandard += week_nonstandard
-        total_gross += week_gross
-        total_net += week_net
-        total_taxes += week_taxes
+        total['wage'] += week_wage
+        total['shift_bonus'] += week_shift_bonus
+        total['overtime'] += week_overtime
+        total['nonstandard'] += week_nonstandard
+        total['gross'] += week_gross
+        total['net'] += week_net
+        total['taxes'] += week_taxes
         
         print(f"\nBase Pay: ${week_wage:,}\nShift Pay: ${week_shift_bonus:,}\nOvertime: ${week_overtime:,}\nNonstandard Pay: ${week_nonstandard:,}\nGross Pay: ${week_gross:,}\nNet Pay: ${week_net:,}\nTaxes and deductibles: ${week_taxes:,}")
-    print(f"\nBase Pay: ${total_wage:,}\nShift Pay: ${total_shift_bonus:,}\nOvertime: ${total_overtime:,}\nNonstandard Pay: ${total_nonstandard:,}\nGross Pay: ${total_gross:,}\nNet Pay: ${total_net:,}\nTaxes and deductibles: ${total_taxes:,}")
+    print(f"\nBase Pay: ${total['wage']:,}\nShift Pay: ${total['shift_bonus']:,}\nOvertime: ${total['overtime']:,}\nNonstandard Pay: ${total['nonstandard']:,}\nGross Pay: ${total['gross']:,}\nNet Pay: ${total['net']:,}\nTaxes and deductibles: ${total['taxes']:,}")
     pay_period_to_salary = round(52 / weeksofwork)
     ask_to_check_salary = True
     while ask_to_check_salary:
         check_salary = input("Would you like to check your salary? Y/n")
         if "y" in check_salary.lower():
-            total_wage = total_wage * pay_period_to_salary
-            total_shift_bonus = total_shift_bonus * pay_period_to_salary
-            total_overtime = total_overtime * pay_period_to_salary
-            total_nonstandard = total_nonstandard * pay_period_to_salary
-            total_gross = total_gross * pay_period_to_salary
-            total_net = total_net * pay_period_to_salary
-            total_taxes = total_taxes * pay_period_to_salary
-            print(f"\nBase Pay: ${total_wage:,}\nShift Pay: ${total_shift_bonus:,}\nOvertime: ${total_overtime:,}\nNonstandard Pay: ${total_nonstandard:,}\nGross Pay: ${total_gross:,}\nNet Pay: ${total_net:,}\nTaxes and deductibles: ${total_taxes:,}")
+            total['wage']  = round(total['wage']  * pay_period_to_salary, 2)
+            total['shift_bonus'] = round(total['shift_bonus'] * pay_period_to_salary, 2)
+            total['overtime'] = round(total['overtime'] * pay_period_to_salary, 2)
+            total['nonstandard'] = round(total['nonstandard'] * pay_period_to_salary, 2)
+            total['gross'] = round(total['gross'] * pay_period_to_salary, 2)
+            total['net'] = round(total['net'] * pay_period_to_salary, 2)
+            total['taxes'] = round(total['taxes'] * pay_period_to_salary, 2)
+            print(f"\nBase Pay: ${total['wage']:,}\nShift Pay: ${total['shift_bonus']:,}\nOvertime: ${total['overtime']:,}\nNonstandard Pay: ${total['nonstandard']:,}\nGross Pay: ${total['gross']:,}\nNet Pay: ${total['net']:,}\nTaxes and deductibles: ${total['taxes']:,}")
         else:
             ask_to_check_salary = False    
             
