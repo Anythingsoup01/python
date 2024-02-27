@@ -1,0 +1,50 @@
+for week in range(1, weeksofwork + 1):
+        if weeksofwork > 4: 
+            print("I'm sorry, to get a more reliable number, please stay within the limit of 1-4")
+            break
+        else:
+            week_hours = checkvar(input(f"\n\nHow many hours did you work for Week {week}? "))
+            week_nonstandard = checkvar(input("Any sick, holiday or vacation time?: "))
+            if week_hours >= 40:
+                week_wage = round(base_wage * 40, 2)
+                week_shift_bonus = round(shift_bonus * (week_hours + week_nonstandard), 2)
+                week_overtime = round(week_hours - 40, 2)
+                week_overtime = round(week_overtime * overtime_wage, 2)
+            else :
+                week_wage = round(base_wage * week_hours, 2)
+                week_shift_bonus = round(shift_bonus * week_hours, 2)
+                week_overtime = 0
+            week_nonstandard = round(week_nonstandard * base_wage, 2)
+            week_gross = round(week_wage + week_shift_bonus + week_overtime + week_nonstandard, 2)
+            week_net = round(week_gross * (1.0 - total_tax_deduction), 2)
+            week_taxes = round(week_gross - week_net, 2)
+        
+        total['wage'] += round(week_wage, 2)
+        total['shift_bonus'] += round(week_shift_bonus, 2)
+        total['overtime'] += round(week_overtime, 2)
+        total['nonstandard'] += round(week_nonstandard, 2)
+        total['gross'] += round(week_gross, 2)
+        total['net'] += round(week_net, 2)
+        total['taxes'] += round(week_taxes, 2)
+        
+        print(f"\nBase Pay: ${week_wage:,}\nShift Pay: ${week_shift_bonus:,}\nOvertime: ${week_overtime:,}\nNonstandard Pay: ${week_nonstandard:,}\nGross Pay: ${week_gross:,}\nNet Pay: ${week_net:,}\nTaxes and deductibles: ${week_taxes:,}")
+    if total['gross'] > 0:
+        print(f"\nBase Pay: ${total['wage']:,}\nShift Pay: ${total['shift_bonus']:,}\nOvertime: ${total['overtime']:,}\nNonstandard Pay: ${total['nonstandard']:,}\nGross Pay: ${total['gross']:,}\nNet Pay: ${total['net']:,}\nTaxes and deductibles: ${total['taxes']:,}")
+        pay_period_to_salary = round(52 / weeksofwork)
+        ask_for_salary = True
+    else : ask_for_salary = False
+    while ask_for_salary:
+        check_salary = input("Would you like to check your salary? Y/n\n")
+        if "y" in check_salary.lower():
+            total['wage']  = round(total['wage']  * pay_period_to_salary, 2)
+            total['shift_bonus'] = round(total['shift_bonus'] * pay_period_to_salary, 2)
+            total['overtime'] = round(total['overtime'] * pay_period_to_salary, 2)
+            total['nonstandard'] = round(total['nonstandard'] * pay_period_to_salary, 2)
+            total['gross'] = round(total['gross'] * pay_period_to_salary, 2)
+            total['net'] = round(total['net'] * pay_period_to_salary, 2)
+            total['taxes'] = round(total['taxes'] * pay_period_to_salary, 2)
+            print(f"\nBase Pay: ${total['wage']:,}\nShift Pay: ${total['shift_bonus']:,}\nOvertime: ${total['overtime']:,}\nNonstandard Pay: ${total['nonstandard']:,}\nGross Pay: ${total['gross']:,}\nNet Pay: ${total['net']:,}\nTaxes and deductibles: ${total['taxes']:,}")
+            break
+        else:
+            break
+            
