@@ -1,92 +1,121 @@
-from core.core import *
-        
-base_wage = checkvar(input("Enter your hourly rate: $"))
-overtime_wage = round(float(base_wage) * 1.5, 2)
-shift_bonus = checkvar(input("Enter shift bonus \"if applicable\": %"), 100, base_wage)
+def checkFloat(opt, var, against = 1, by = 1) :
+    if "x" in var : quit()
+    elif "float" in opt and "%" in var :
+        return round(float(var.replace("%", "")) / against, by)
+    elif "float" in opt :
+        var = var or 0
+        return round(float(var) / against * by, 2)
+    elif "rate" in opt :
+        var = var or 1.5
+        return round(float(var) * against, by)
 
-four_01k = input("Do you have a 401k? If so please add the $Amount or %Amount: ($)")
-is_percent_amount = checkbool(four_01k)
-four_01k = checkvar(four_01k)
+def checkBool(var):
+    if var <= 1.0 : return True
+    else : return False
 
-health_insurance = int(checkvar(input("How many health insurances do you pay for? ")))
+def calculateFederal(gross_pay):
+    if gross_pay <= 11600: return .1
+    if gross_pay <= 47150: return .12
+    if gross_pay <= 100525: return .22
 
-total_health_insurance = 0
+while True :
 
-for insurances in range(1, health_insurance + 1):
-    insurance = checkvar(input(f"How much do you pay for insurance {insurances}: $"))
-    total_health_insurance += insurance
+    baseWage = checkFloat("float", input("Hourly Rate: $"))
+    overtimeRate = checkFloat("rate", input("Overtime Multiplier (1.5x) :"), baseWage, 4)
+    shiftRate = checkFloat("float", input("Shift Rate: %"), 100, baseWage)
+    four01K = checkFloat("float", input("401k? ($/%): "), 100)
+    isPercent = checkBool(four01K)
 
-state_income_tax = .0305
-local_income_tax = .025
+    healthInsurance = int(checkFloat("float", input("How many insurances? :")))
+    totalHealthInsurance = 0
 
-ssi_income_rate = .062
-medicare_rate = .0145
+    for insurances in range(1, healthInsurance + 1):
+        insurance = checkFloat("float", input(f"How much do you pay for insurance {insurances}: $"))
+        totalHealthInsurance += insurance
 
+    stateIncomeTax = .0305
+    localIncomeTax = .025
+    ssiIncomeRate = .062
+    medicareRate = .0145
 
+    reset = True
+    while reset :
 
-while True:
+        weeksOfWork = int(checkFloat("float", input("\nWeeks / Pay Period: ")))
+        total = {'wage' : 0, 'shift_bonus' : 0, 'overtime' : 0, 'nonstandard' : 0, 'federal_taxes' : 0, 'state_taxes' : 0, 'local_taxes' : 0, 'ssi_rate' : 0, 'medicare_rate' : 0, 'taxes' : 0,'401k' : 0, 'gross' : 0, 'net' : 0}
 
-    weeksofwork = int(checkvar(input("\nWeeks / Pay period: ")))
-    total = {'wage' : 0, 'shift_bonus' : 0, 'overtime' : 0, 'nonstandard' : 0, 'federal_taxes' : 0, 'state_taxes' : 0, 'local_taxes' : 0, 'ssi_rate' : 0, 'medicare_rate' : 0, 'taxes' : 0,'401k' : 0, 'gross' : 0, 'net' : 0}
-    
-    for week in range(1, weeksofwork + 1) :
-        if weeksofwork > 4: 
-            print("I'm sorry, to get a more reliable number, please stay within the limit of 1-4")
-            break
-        else:
-            week_hours = checkvar(input(f"\n\nHow many hours did you work for Week {week}? "))
-            week_nonstandard = checkvar(input("Any sick, holiday or vacation time?: "))
-            if week_hours >= 40:
-                week_wage = round(base_wage * 40, 2)
-                week_shift_bonus = round(shift_bonus * (week_hours + week_nonstandard), 2)
-                week_overtime = round(week_hours - 40, 2)
-                week_overtime = round(week_overtime * overtime_wage, 2)
+        for week in range(1, weeksOfWork + 1) :
+
+            if weeksOfWork > 4 or weeksOfWork < 0 :
+
+                print("I'm sorry, Please stay within 1-4 Weeks")
+                break
+
             else :
-                week_wage = round(base_wage * week_hours, 2)
-                week_shift_bonus = round(shift_bonus * week_hours, 2)
-                week_overtime = 0
-                
-            week_nonstandard = round(week_nonstandard * base_wage, 2)
-            week_gross = round(week_wage + week_shift_bonus + week_overtime + week_nonstandard, 2)                
-            week_401k = round(calculate_401k(week_gross, four_01k, is_percent_amount), 2)
-            
-            week_taxable_gross_pay = round(week_gross - ((week_401k / weeksofwork) + (total_health_insurance / weeksofwork)), 2)
-            federal_income_tax = round(calculate_federal(week_taxable_gross_pay), 2)
-            total_tax_deduction = round(federal_income_tax + state_income_tax + local_income_tax + ssi_income_rate + medicare_rate, 4) 
 
-            week_net = round(week_taxable_gross_pay * (1.0 - total_tax_deduction), 2)
+                weekHours = checkFloat("float", input(f"\n\nHow many hours for week {week}: "))
+                weekNonstandard = checkFloat("float", input(f"Any PTO? :"))
 
-            week_federal_taxes = round(federal_income_tax * week_taxable_gross_pay, 2)
-            week_state_taxes = round(state_income_tax * week_taxable_gross_pay, 2)
-            week_local_taxes = round(local_income_tax * week_taxable_gross_pay, 2)
-            week_ssi_rate = round(ssi_income_rate * week_taxable_gross_pay, 2)
-            week_medicare_rate = round(medicare_rate * week_taxable_gross_pay, 2)
+                if weekHours >= 40:
+                    weekWage = round(baseWage * 40, 2)
+                    weekOvertime = round(float(weekHours - 40) * overtimeRate, 2)
 
-            week_taxes = round(week_taxable_gross_pay - week_net, 2)
+                else :
 
-        total['wage'] += round(week_wage, 2)
-        total['shift_bonus'] += round(week_shift_bonus, 2)
-        total['overtime'] += round(week_overtime, 2)
-        total['nonstandard'] += round(week_nonstandard, 2)
-        total['federal_taxes'] += round(week_federal_taxes, 2)
-        total['state_taxes'] += round(week_state_taxes, 2)
-        total['local_taxes'] += round(week_local_taxes, 2)
-        total['ssi_rate'] += round(week_ssi_rate, 2)
-        total['medicare_rate'] += round(week_medicare_rate, 2)
-        total['taxes'] += round(week_taxes, 2)
-        total['401k'] += round(week_401k, 2)
-        total['gross'] += round(week_gross, 2)
-        total['net'] += round(week_net, 2)
-      
-        print(f"\nBase Pay: ${week_wage:,}\nShift Pay: ${week_shift_bonus:,}\nOvertime: ${week_overtime:,}\nNonstandard Pay: ${week_nonstandard:,}\nTotal Taxes: ${week_taxes:,}\n401k: ${week_401k}\nGross Pay: ${week_gross:,}\nNet Pay: ${week_net:,}")
-    print(f"\nBase Pay: ${total['wage']:,}\nShift Pay: ${total['shift_bonus']:,}\nOvertime: ${total['overtime']:,}\nNonstandard Pay: ${total['nonstandard']:,}\nTotal Taxes: ${total['taxes']:,}\n401k: ${total['401k']}\nTotal Health Coverage: ${total_health_insurance:,}\nGross Pay: ${total['gross']:,}\nNet Pay: ${total['net']:,}")
-    
-    while True:
-        paycheck_in_year = round (52 / weeksofwork)
-        opt = input("What would you like to do? (Exit) (Details) (Salary)")
-        if "exit" in opt.lower():
-            break
-        elif "details" in opt.lower():
-            print(f"\nFederal Taxes: ${total['federal_taxes']:,}\nState Taxes: ${total['state_taxes']:,}\nLocal Taxes: ${total['local_taxes']:,}\nSocial Security: ${total['ssi_rate']:,}\nMedicare: ${total['medicare_rate']:,}\nTotal Taxes: ${total['taxes']:,}")
-        elif "salary" in opt.lower() :
-            print(f"\nBase Pay: ${total['wage'] * paycheck_in_year:,}\nShift Pay: ${total['shift_bonus'] * paycheck_in_year:,}\nOvertime: ${total['overtime'] * paycheck_in_year:,}\nNonstandard Pay: ${total['nonstandard'] * paycheck_in_year:,}\nTotal Taxes: ${total['taxes'] * paycheck_in_year:,}\nTotal 401k: ${total['401k'] * paycheck_in_year}\nTotal Health Coverage: ${total_health_insurance * paycheck_in_year:,}\nGross Pay: ${total['gross'] * paycheck_in_year:,}\nNet Pay: ${total['net'] * paycheck_in_year:,}")
+                    weekWage = round(baseWage * weekHours, 2)
+                    weekOvertime = 0
+                weekShiftWage = round(shiftRate * (weekHours + weekNonstandard), 2)
+                weekNonstandard = round(weekNonstandard * baseWage, 2)
+                weekGross = round(weekWage + weekShiftWage + weekOvertime + weekNonstandard, 2)
+                week401K = round(weekGross * four01K, 2)
+                weekTaxable = round(weekGross - ((week401K + totalHealthInsurance) / weeksOfWork), 2)
+
+                federalIncomeTax = round(calculateFederal(weekTaxable), 2)
+                weekFederalTaxes = round(federalIncomeTax * weekTaxable, 2)
+                weekStateTaxes = round(stateIncomeTax * weekTaxable, 2)
+                weekLocalTaxes = round(localIncomeTax * weekTaxable, 2)
+                weekSsiRate = round(ssiIncomeRate * weekTaxable, 2)
+                weekMedicareRate = round(medicareRate * weekTaxable, 2)
+                weekTaxes = round(weekFederalTaxes + weekStateTaxes + weekLocalTaxes + weekSsiRate + weekMedicareRate, 2)
+
+                weekNet = round(weekTaxable - weekTaxes, 2)
+
+            total['wage'] += round(weekWage, 2)
+            total['shift_bonus'] += round(weekShiftWage, 2)
+            total['overtime'] += round(weekOvertime, 2)
+            total['nonstandard'] += round(weekNonstandard, 2)
+            total['federal_taxes'] += round(weekFederalTaxes, 2)
+            total['state_taxes'] += round(weekStateTaxes, 2)
+            total['local_taxes'] += round(weekLocalTaxes, 2)
+            total['ssi_rate'] += round(weekSsiRate, 2)
+            total['medicare_rate'] += round(weekMedicareRate, 2)
+            total['taxes'] += round(weekTaxes, 2)
+            total['401k'] += round(week401K, 2)
+            total['gross'] += round(weekGross, 2)
+            total['net'] += round(weekNet, 2)
+
+            print(f"\nBase Pay: ${weekWage:,}\nShift Pay: ${weekShiftWage:,}\nOvertime: ${weekOvertime:,}\nNonstandard Pay: ${weekNonstandard:,}\nTotal Taxes: ${weekTaxes:,}\n401k: ${week401K}\nGross Pay: ${weekGross:,}\nNet Pay: ${weekNet:,}")
+        print(f"\nBase Pay: ${round(total['wage'], 2):,}\nShift Pay: ${round(total['shift_bonus'], 2):,}\nOvertime: ${round(total['overtime'], 2):,}\nNonstandard Pay: ${round(total['nonstandard'], 2):,}\nTotal Taxes: ${round(total['taxes'], 2):,}\n401k: ${round(total['401k'], 2)}\nTotal Health Coverage: ${round(totalHealthInsurance, 2):,}\nGross Pay: ${round(total['gross'], 2):,}\nNet Pay: ${round(total['net'], 2):,}")
+
+        while True:
+            paycheck_in_year = round (52 / weeksOfWork)
+            opt = input("What would you like to do? (Redo) (Reset) (Details) (Salary) (Payments)")
+            if "redo" in opt.lower():
+                break
+            elif "reset" in opt.lower():
+                reset = False
+                break
+            elif "details" in opt.lower():
+                print(f"\nFederal Taxes: ${round(total['federal_taxes'], 2):,}\nState Taxes: ${round(total['state_taxes'], 2):,}\nLocal Taxes: ${round(total['local_taxes'], 2):,}\nSocial Security: ${round(total['ssi_rate'], 2):,}\nMedicare: ${round(total['medicare_rate'], 2):,}\nTotal Taxes: ${round(total['taxes'], 2):,}")
+            elif "salary" in opt.lower() :
+                print(f"\nBase Pay: ${round(total['wage'] * paycheck_in_year, 2):,}\nShift Pay: ${round(total['shift_bonus'] * paycheck_in_year, 2):,}\nOvertime: ${round(total['overtime'] * paycheck_in_year, 2):,}\nNonstandard Pay: ${round(total['nonstandard'] * paycheck_in_year, 2):,}\nTotal Taxes: ${round(total['taxes'] * paycheck_in_year, 2):,}\nTotal 401k: ${round(total['401k'] * paycheck_in_year, 2)}\nTotal Health Coverage: ${round(totalHealthInsurance * paycheck_in_year, 2):,}\nGross Pay: ${round(total['gross'] * paycheck_in_year, 2):,}\nNet Pay: ${round(total['net'] * paycheck_in_year, 2):,}")
+            elif "payment" in opt.lower() :
+                payment = True
+                while payment:
+                    number_of_payments = int(checkFloat("float", input("\nHow many payments do you have? ")))
+                    if number_of_payments > 0:
+                        total_spent = 0
+                        for payments in range(1, number_of_payments + 1) :
+                            total_spent += checkFloat("float", input(f"\nHow much is your payment {payments}? $"))
+                    print(f"\nYou have spent {round(total_spent, 2):,}\nYou will have {round((total['net'] * 2) - total_spent, 2):,}\n\n")
+                    break
